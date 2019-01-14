@@ -1,14 +1,115 @@
 <plugin>
+	<div class="plugin-content">
+		<b>Hermesys BaseMap</b>
+		<ul>
+			<li class = "clickable-size" data-ref="googlestreet">GOOGLE MAP</li>
+			<li class = "clickable-size" data-ref="OSM">OSM</li>
+		
+		</ul>
+		
+		<b>Hermesys Layer</b>
+		<ul>
+			<li class = "clickable-size" data-ref="stream5000">FloodEval:dem_stream5000</li>
+			<li class = "clickable-size" data-ref="stream1000">FloodEval:dem_stream1000</li>
+		
+		</ul>
+		
+	
+	</div>
 
-	<b>This plugin will rock</b>
-
+	
+	
 	<script>
 
-	console.log('I am mounted to the page')
-
-	this.onopen = () => console.log('I am opened')
-
-	this.onclose = () => console.log('I am being closed')
+	import map from '@windy/map'
+	map.baseLayer.setOpacity(0.5); 
+	
+	<!-- let popup = null -->
+	
+	<!-- var ras_stream5000 ="FloodEval:dem_stream5000" -->
+	<!-- var ras_stream1000="FloodEval:dem_stream1000" -->
+	var ras_stream
+	
+	
+	this.refs.stream5000.onclick=()=>loadLayer("FloodEval:dem_stream5000")
+	this.refs.stream1000.onclick=()=>loadLayer("FloodEval:dem_stream1000")
+	
+	this.refs.googlestreet.onclick=()=>baseMap_change("google")
+	this.refs.OSM.onclick=()=>baseMap_change("OSM")
+	
+	
+	this.onclose = () => layer_remove()
+	
+	
+	<!-- loadLayer('FloodEval:dem_stream5000') -->
+	
+	this.onopen=()=>{
+		var baseLayer ={
+			"opestreetLayer": baseMap
+		};
+		
+		var overlays = { 
+			"ras_stream5000": ras_stream5000, 
+			"ras_stream1000": ras_stream1000,
+		};
+	
+	
+	//	 L.control.layers("",overlays).addTo(map);
+	L.control.layers(baseLayer,overlays,{position:"bottomleft"}).addTo(map);
+	
+	
+		/*
+		map.addLayer(baseMap);
+		map.baseLayer.setUrl("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
+		map.baseLayer.setOpacity(0.5); 
+		map.removeLayer(W.labelsLayer);
+		map.options.maxZoom = 18;
+		*/
+	}
+	
+	
+	// baseMap Change
+	function baseMap_change(base){
+		console.log(base);
+		if(base == "google"){
+			<!-- console.log(base=="google"); -->
+			L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',{
+				maxZoom: 20,
+				subdomains:['mt0','mt1','mt2','mt3']
+			}).addTo(map);
+		}
+		
+		if(base=="OSM"){
+			L.tileLayer ( 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
+					<!-- minZoom : 5, -->
+					maxZoom : 20, 
+					<!-- opacity:0.5 //투명도 조절 -->
+			}).addTo(map);	
+		}		
+	}
+	
+	
+	
+	function loadLayer(layer){
+		
+		ras_stream = L.tileLayer.wms("http://210.92.123.177:8080/geoserver/FloodEval/wms",{
+			layers:layer,
+			format: 'image/png',
+			transparent: true,
+			attribution: layer,
+		})
+		
+		map.addLayer(ras_stream);
+		<!-- ras_stream.addTo(map); -->
+		
+		<!-- console.log(ras_stream) -->
+	}
+	
+	function layer_remove(layer){
+		map.removeLayer(layer)
+		
+	}
+	
 
 	</script>
 </plugin>
